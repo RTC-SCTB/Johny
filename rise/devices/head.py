@@ -2,8 +2,8 @@ import random
 
 import can
 import time
-from cannet import steppercontroller, bot
-from cannet.steppercontroller import WorkMode, CalibrationMode
+from rise.cannet import steppercontroller, bot
+from rise.cannet.steppercontroller import WorkMode, CalibrationMode
 
 
 class Head:
@@ -18,22 +18,22 @@ class Head:
         """ Запускаем работу головы """
         # параметры для двигателя 0
         self._stepController.setParamRequest(0x02, 150)  # Calibrate step length
-        self._stepController.setParamRequest(0x03, 30)  # Min step length
-        self._stepController.setParamRequest(0x04, 50)  # Max step length
+        self._stepController.setParamRequest(0x03, 20)  # Min step length
+        self._stepController.setParamRequest(0x04, 120)  # Max step length
         self._stepController.setParamRequest(0x05, 1)  # Accel brake step
-
+        time.sleep(0.1)
         # параметры для двигателя 1
         self._stepController.setParamRequest(0x0F, 100)  # Calibrate step length
         self._stepController.setParamRequest(0x10, 20)  # Min step length
         self._stepController.setParamRequest(0x11, 80)  # Max step length
         self._stepController.setParamRequest(0x12, 2)  # Accel brake step
-
+        time.sleep(0.1)
         # параметры для двигателя 2
         self._stepController.setParamRequest(0x1C, 100)  # Calibrate step length
         self._stepController.setParamRequest(0x1D, 20)  # Min step length
         self._stepController.setParamRequest(0x1E, 80)  # Max step length
         self._stepController.setParamRequest(0x1F, 2)  # Accel brake step
-
+        time.sleep(0.1)
         self._stepController.setWorkMode(0, WorkMode.CONTROL_POSITION)
         self._stepController.setWorkMode(1, WorkMode.CONTROL_POSITION)
         self._stepController.setWorkMode(2, WorkMode.CONTROL_POSITION)
@@ -64,8 +64,7 @@ class Head:
             length = ar[i][1] - ar[i][0]  # получаем длину допустимого диапазона в углах
             position[i] = int(((angles[i] + (length / 2)) / length) * pr[i])
 
-        for i in range(3):
-            self._stepController.setPosition(i, position[i])
+        self._stepController.setAllPosition(*position)
 
 
 if __name__ == "__main__":

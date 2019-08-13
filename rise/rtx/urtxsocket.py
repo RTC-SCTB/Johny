@@ -132,20 +132,20 @@ if __name__ == "__main__":
 
     def th():
         cl = TcpClient()
-        cl.connect(("localhost", 9090))
+        cl.connect(("localhost", 9094))
         cl.start()
 
         def onReceive(data):
             print("onRec", data)
 
-        def onDesc1(data):
-            print(0, data)
+        def onDesc3(data):
+            print(3, data)
 
         def onDesc2(data):
             print(1, data)
 
         cl.subscribe("onReceive", onReceive)
-        cl.subscribe(0, onDesc1)
+        cl.subscribe(3, onDesc3)
         cl.subscribe(1, onDesc2)
 
         cl.sendPackage(0, (5,))
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     t.start()
 
     serv = TcpServer()
-    serv.connect(("localhost", 9090))
+    serv.connect(("localhost", 9094))
     serv.start()
 
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     serv.subscribe(0, onDesc1)
     serv.subscribe(1, onDesc2)
 
-    serv.sendPackage(0, (3,))
+    serv.sendPackage(3, ())
     serv.sendPackage(1, (1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15, 21))
 
     while True:

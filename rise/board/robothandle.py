@@ -41,9 +41,8 @@ class JohnyHandle:
         self._head.setAllPosition(*data)
 
     def __recvVideoState(self, data):
-        print(data)
         if data[0]:
-            self._video.start(["./videoout.sh"])
+            self._video.start(["./rise/utility/videoout.sh"])
         else:
             self._video.stop()
 

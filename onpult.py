@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import time
 
-from rise.onpult.robot import Johny
+from rise.pult.robot import Johny
 
 j = Johny(("localhost", 9099))
 j.connect()

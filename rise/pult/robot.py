@@ -38,7 +38,7 @@ class Johny(threading.Thread):
 
     def videoState(self, state):
         if state:
-            self._video.start(["./rise/onpult/videoin.sh"])
+            self._video.start(["./rise/utility/videoin.sh"])
         else:
             self._video.stop()
         self._client.sendPackage(4, (bool(state), ))

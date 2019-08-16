@@ -1,5 +1,3 @@
-import random
-
 import can
 import time
 
@@ -7,6 +5,7 @@ from rise.rtx.urtxsocket import TcpServer
 from rise.devices.head import Head
 from rise.cannet.bot import Robot
 from rise.cannet.steppercontroller import StepperController
+from rise.utility.video import VideoProcess
 
 
 class JohnyHandle:
@@ -21,7 +20,9 @@ class JohnyHandle:
         self._head = Head(self._step)
         self._server.subscribe(2, self.__recvPosition)
         self._server.subscribe(3, self.__recvCalibrate)
+        self._server.subscribe(4, self.__recvVideoState)
         self._server.subscribe("onReceive", self.__onReceive)
+        self._video = VideoProcess()
 
     def connect(self):
         self._server.connect(host=self._host)
@@ -39,6 +40,13 @@ class JohnyHandle:
         """ обработчик события о пришествии позиции робота """
         self._head.setAllPosition(*data)
 
+    def __recvVideoState(self, data):
+        print(data)
+        if data[0]:
+            self._video.start(["./videoout.sh"])
+        else:
+            self._video.stop()
+
     def __onReceive(self, data):
         """ Хендлер - заглушка """
         pass
@@ -49,7 +57,7 @@ if __name__ == "__main__":
     robot = Robot(bus)
     robot.online = True
     robot.start()
-    jh = JohnyHandle(("localhost", 9098), robot)
+    jh = JohnyHandle(("localhost", 9099), robot)
     jh.connect()
     while True:
 

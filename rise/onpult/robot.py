@@ -8,6 +8,7 @@ from rise.utility import eventmaster
 from rise.rtx.urtxsocket import TcpClient
 import threading
 from rise.devices.helmet import Helmet
+from rise.utility.video import VideoProcess
 
 
 class Johny(threading.Thread):
@@ -18,14 +19,15 @@ class Johny(threading.Thread):
         self._client = TcpClient()
         self._helmet = Helmet()
         self._host = host
+        self._video = VideoProcess()
         self.__exit = False
 
     def connect(self):
         self._client.connect(host=self._host)
         self._client.start()
+        self.videoState(True)
 
     def setHeadPosition(self, angle0, angle1, angle2):
-        print(angle0, angle1, angle2)
         self._client.sendPackage(2, (angle0, angle1, angle2))
 
     def calibrateHead(self):
@@ -34,11 +36,18 @@ class Johny(threading.Thread):
     def exit(self):
         self.__exit = True
 
+    def videoState(self, state):
+        if state:
+            self._video.start(["./rise/onpult/videoin.sh"])
+        else:
+            self._video.stop()
+        self._client.sendPackage(4, (bool(state), ))
+
     def run(self):
         self._helmet.setZeroNow()
         while not self.__exit:
             yaw, pitch, roll = self._helmet.getAngles()
-            self.setHeadPosition(int(-pitch), int(roll), int(yaw))
+            self.setHeadPosition(int(-pitch), int(roll), 0) # TODO: #int(yaw))
             time.sleep(0.1)
 
 

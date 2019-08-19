@@ -16,7 +16,7 @@ class Helmet:
     def getRawAngles(self):
         # TODO: перенести это все в СИшный код
         self._hmd.poll()
-        qw, qx, qy, qz = self._hmd.rotation[0:4]
+        qx, qy, qz, qw = self._hmd.rotation[0:4]
         roll = math.atan2(2 * (qw * qx + qy * qz), 1 - 2 * (qx ** 2 + qy ** 2)) * (180 / math.pi)
         pitch = math.asin(2 * (qw * qy - qz * qx)) * (180 / math.pi)
         yaw = math.atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy ** 2 + qz ** 2)) * (180 / math.pi)

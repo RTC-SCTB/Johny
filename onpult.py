@@ -4,7 +4,7 @@ import time
 
 from rise.pult.robot import Johny
 
-j = Johny(("localhost", 9099))
+j = Johny(("127.0.0.1", 9005))
 j.connect()
 time.sleep(14)
 j.start()

@@ -47,7 +47,7 @@ class Johny(threading.Thread):
         self._helmet.setZeroNow()
         while not self.__exit:
             yaw, pitch, roll = self._helmet.getAngles()
-            self.setHeadPosition(int(-pitch), int(roll), 0) # TODO: #int(yaw))
+            self.setHeadPosition(int(yaw), int(pitch), int(roll))
             time.sleep(0.1)
 
 

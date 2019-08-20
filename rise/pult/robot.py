@@ -9,6 +9,12 @@ from rise.rtx.urtxsocket import TcpClient
 import threading
 from rise.devices.helmet import Helmet
 from rise.utility.video import VideoProcess
+import datetime
+
+# словаро с описанием ошибок по номеру ошибки
+errorDict = {
+    0x03: "Не все калибровочные данные получены"
+}
 
 
 class Johny(threading.Thread):
@@ -21,6 +27,22 @@ class Johny(threading.Thread):
         self._host = host
         self._video = VideoProcess()
         self.__exit = False
+        self._client.subscribe(1, self.__recvError)
+        self._client.subscribe("onReceive", self.__onReceive)
+        self.errorList = []
+
+    def __onReceive(self, data):
+        """ Хендлер - заглушка """
+        pass
+
+    def __recvError(self, data):
+        """ обработчик пришедших с робота ошибок """
+        error = {"num": data[0],  # номер ошибки
+                 "dlc": data[1],  # дополнение
+                 "time": datetime.datetime.now(),  # время ошибки
+                 "desc": errorDict.get(data[0])}  # описание
+
+        self.errorList.append(error)
 
     def connect(self):
         self._client.connect(host=self._host)
@@ -41,7 +63,7 @@ class Johny(threading.Thread):
             self._video.start(["./rise/utility/videoin.sh"])
         else:
             self._video.stop()
-        self._client.sendPackage(4, (bool(state), ))
+        self._client.sendPackage(4, (bool(state),))
 
     def run(self):
         self._helmet.setZeroNow()
@@ -53,12 +75,12 @@ class Johny(threading.Thread):
 
 if __name__ == "__main__":
     import random
+
     j = Johny(("localhost", 9096))
     j.connect()
     time.sleep(14)
-    #j.calibrateHead()
+    # j.calibrateHead()
     while True:
-        #pos = (random.randint(-65, 65), random.randint(-50, 50), random.randint(-42, 42))
-        #j.setHeadPosition(*pos)
+        # pos = (random.randint(-65, 65), random.randint(-50, 50), random.randint(-42, 42))
+        # j.setHeadPosition(*pos)
         time.sleep(3)
-

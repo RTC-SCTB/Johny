@@ -75,4 +75,4 @@ class BaseController:
         try:
             return self._paramDict[num]["activeValue"]
         except KeyError:
-            raise ValueError("У данного параметра нет активного значения")
+            raise KeyError("У данного параметра нет активного значения")

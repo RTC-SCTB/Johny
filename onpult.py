@@ -10,3 +10,4 @@ time.sleep(14)
 j.start()
 while True:
     time.sleep(3)
+    print(j.errorList)

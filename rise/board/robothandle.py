@@ -18,6 +18,7 @@ class JohnyHandle:
         self._step = StepperController(self._robot, 0x230)
         self._robot.addDevice(self._step)
         self._head = Head(self._step)
+        self._server.subscribe(1, self.__recvError)
         self._server.subscribe(2, self.__recvPosition)
         self._server.subscribe(3, self.__recvCalibrate)
         self._server.subscribe(4, self.__recvVideoState)
@@ -32,13 +33,24 @@ class JohnyHandle:
     def setHeadPosition(self, angle0, angle1, angle2):
         self._head.setAllPosition(*pos)
 
+    def sendError(self, num, dlc=0):
+        """ сообщить об ошибке на пульт """
+        self._server.sendPackage(1, (num, dlc))
+
+    def __recvError(self, data):
+        """ Обработчик пришедшей ошибки с пульта """
+        pass
+
     def __recvCalibrate(self, data):
         """ обработчик события о пришествии комманды калибровки """
         self._head.calibrate()
 
     def __recvPosition(self, data):
         """ обработчик события о пришествии позиции робота """
-        self._head.setAllPosition(*data)
+        try:
+            self._head.setAllPosition(*data)
+        except KeyError:
+            self.sendError(0x03)   # отправляем код ошибки
 
     def __recvVideoState(self, data):
         if data[0]:

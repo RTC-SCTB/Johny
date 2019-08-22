@@ -53,7 +53,7 @@ class Pult:
         """ развертываем интерфейс из glade """
         self._defaultConfigurationFilePath = "conf.json"
         self._configuration = None
-        self.isConnected = False
+        self._isConnected = False
         self.robot = Johny(None)
         self._helmet = Helmet()
 
@@ -85,6 +85,10 @@ class Pult:
         self._mainWindow.show_all()
         Gtk.main()
 
+    @property
+    def isConnected(self):
+        return self._isConnected
+
     def printLog(self, string):
         end_iter = self._logTextview.get_buffer().get_end_iter()  # получение итератора конца строки
         self._logTextview.get_buffer().insert(end_iter, str(datetime.datetime.now()) + "\t" + string + "\n")
@@ -92,16 +96,16 @@ class Pult:
     def __onoffButtonClick(self, w):
         state = w.get_active()
         if state:
-            try:
+            #try:
                 self.robot.connect()
-                self.isConnected = True
-            except ConnectionError:
-                self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
-                w.set_active(False)
+                self._isConnected = True
+            #except ConnectionError:
+                #self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
+                #w.set_active(False)
         else:
             try:
                 self.robot.disconnect()
-                self.isConnected = False
+                self._isConnected = False
             except BrokenPipeError:
                 self.printLog("Связь была прервана")
 

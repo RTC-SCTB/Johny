@@ -17,12 +17,10 @@ class Johny:
     """ Класс интерфейс Джонни """
 
     def __init__(self, host):
-        self._client = TcpClient()
+        self._client = None
         self.host = host
         self._video = Video()
         self.__exit = False
-        self._client.subscribe(1, self.__recvError)
-        self._client.subscribe("onReceive", self.__onReceive)
         self.errorList = []
 
     def __onReceive(self, data):
@@ -39,14 +37,19 @@ class Johny:
         self.errorList.append(error)
 
     def connect(self):
+        self._client = TcpClient()
+        self._client.subscribe(1, self.__recvError)
+        self._client.subscribe("onReceive", self.__onReceive)
         self._client.connect(host=self.host)
         self._client.start()
         self.videoState(True)
+        self.calibrateHead()
 
     def disconnect(self):
         self.videoState(False)
-        time.sleep(1)
         self._client.disconnect()
+        del self._client
+        self._client = None
 
     def setHeadPosition(self, angle0, angle1, angle2):
         self._client.sendPackage(2, (angle0, angle1, angle2))
@@ -63,7 +66,6 @@ class Johny:
         else:
             self._video.stop()
         self._client.sendPackage(4, (bool(state),))
-
 
 
 if __name__ == "__main__":

@@ -12,7 +12,6 @@ class SocketUrtx(threading.Thread):
         self._sock = socket.socket(**kwargs)
         self._host = None  # (ip, port)
         self.__exit = False  # метка выхода
-        self._connected = False
         self._eventDict = {"onReceive": eventmaster.Event("onReceive")}  # создаем словарь событий
         self._eventMaster = eventmaster.EventMaster()  # создаем мастера событий
         self._eventMaster.append(self._eventDict["onReceive"])  # добавляем событие в мастер событий
@@ -24,15 +23,8 @@ class SocketUrtx(threading.Thread):
 
     def connect(self, host):
         """ метод подключения к хосту """
-        if self._connected:
-            raise ConnectionError("Server уже подключен")
-        else:
-            try:
-                self._host = host
-                self._connect(host)
-                self._connected = True
-            except:
-                raise ConnectionError("Не удалось подключиться к " + str(host))
+        self._host = host
+        self._connect(host)
 
     def _connect(self, host):
         """ метод для перегрузки классом наследником """
@@ -40,7 +32,7 @@ class SocketUrtx(threading.Thread):
 
     def disconnect(self):
         """ метод отключения от хоста """
-        self._connected = False
+        self._sock.shutdown(socket.SHUT_RDWR)
         self._sock.close()
 
     def exit(self):
@@ -70,9 +62,9 @@ class SocketUrtx(threading.Thread):
 
     def run(self):
         while not self.__exit:
-            if self._connected:
+            try:
                 self._readPackage()
-            else:
+            except:
                 time.sleep(1)
 
     def subscribe(self, event, handler):
@@ -87,18 +79,19 @@ class TcpServer(SocketUrtx):
     def __init__(self, **kwargs):
         SocketUrtx.__init__(self, type=socket.SOCK_STREAM, **kwargs)
 
-    def _connect(self, host):
+    def open(self, host):
         self._sock.bind(host)
         self._sock.listen(1)
+
+    def _connect(self, host):
         self.__rec, _ = self._sock.accept()
+        self.__rec.settimeout(3.0)
 
     def _readArray(self, size):
         out = b''
         for i in range(size):
             b = self.__rec.recv(1)
             if b is None:   # соединение разорвано
-                self.exit()
-                self.disconnect()
                 return None
             out += b
         return out
@@ -120,8 +113,6 @@ class TcpClient(SocketUrtx):
         for i in range(size):
             b = self._sock.recv(1)
             if b is None:   # соединение разорвано
-                self.exit()
-                self.disconnect()
                 return None
             out += b
         return out

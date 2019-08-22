@@ -38,7 +38,7 @@ class Head:
         self._stepController.setWorkMode(1, WorkMode.CONTROL_POSITION)
         self._stepController.setWorkMode(2, WorkMode.CONTROL_POSITION)
 
-        self.calibrate()  # запускаем калибровку
+        #self.calibrate()  # запускаем калибровку
 
     def calibrate(self):
         """ Калибровка углов головы """

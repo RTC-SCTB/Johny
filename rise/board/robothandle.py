@@ -5,7 +5,7 @@ from rise.rtx.urtxsocket import TcpServer
 from rise.devices.head import Head
 from rise.cannet.bot import Robot
 from rise.cannet.steppercontroller import StepperController
-from rise.utility.video import VideoProcess
+from rise.utility.video import Video, VIDEO_OUT_LAUNCH
 
 
 class JohnyHandle:
@@ -23,7 +23,7 @@ class JohnyHandle:
         self._server.subscribe(3, self.__recvCalibrate)
         self._server.subscribe(4, self.__recvVideoState)
         self._server.subscribe("onReceive", self.__onReceive)
-        self._video = VideoProcess()
+        self._video = Video()
 
     def connect(self):
         self._server.connect(host=self._host)
@@ -54,7 +54,7 @@ class JohnyHandle:
 
     def __recvVideoState(self, data):
         if data[0]:
-            self._video.start(["./rise/utility/videoout.sh"])
+            self._video.start(VIDEO_OUT_LAUNCH)
         else:
             self._video.stop()
 

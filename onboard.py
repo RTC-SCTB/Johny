@@ -10,7 +10,7 @@ bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
 robot = Robot(bus)
 robot.online = True
 robot.start()
-jh = JohnyHandle(("", 9005), robot)
+jh = JohnyHandle(("", 9002), robot)
 jh.connect()
 while True:
     time.sleep(3)

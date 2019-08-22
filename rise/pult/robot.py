@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import socket
 import time
-import math
-from rise.rtx.urtx import proto
-from rise.utility import eventmaster
 from rise.rtx.urtxsocket import TcpClient
 import threading
 from rise.devices.helmet import Helmet
-from rise.utility.video import VideoProcess
+from rise.utility.video import Video, VIDEO_IN_LAUNCH
 import datetime
 
 # словаро с описанием ошибок по номеру ошибки
@@ -17,15 +13,13 @@ errorDict = {
 }
 
 
-class Johny(threading.Thread):
+class Johny:
     """ Класс интерфейс Джонни """
 
     def __init__(self, host):
-        threading.Thread.__init__(self, daemon=True)
         self._client = TcpClient()
-        self._helmet = Helmet()
-        self._host = host
-        self._video = VideoProcess()
+        self.host = host
+        self._video = Video()
         self.__exit = False
         self._client.subscribe(1, self.__recvError)
         self._client.subscribe("onReceive", self.__onReceive)
@@ -45,9 +39,14 @@ class Johny(threading.Thread):
         self.errorList.append(error)
 
     def connect(self):
-        self._client.connect(host=self._host)
+        self._client.connect(host=self.host)
         self._client.start()
         self.videoState(True)
+
+    def disconnect(self):
+        self.videoState(False)
+        time.sleep(1)
+        self._client.disconnect()
 
     def setHeadPosition(self, angle0, angle1, angle2):
         self._client.sendPackage(2, (angle0, angle1, angle2))
@@ -60,17 +59,11 @@ class Johny(threading.Thread):
 
     def videoState(self, state):
         if state:
-            self._video.start(["./rise/utility/videoin.sh"])
+            self._video.start(VIDEO_IN_LAUNCH)
         else:
             self._video.stop()
         self._client.sendPackage(4, (bool(state),))
 
-    def run(self):
-        self._helmet.setZeroNow()
-        while not self.__exit:
-            yaw, pitch, roll = self._helmet.getAngles()
-            self.setHeadPosition(int(yaw), int(pitch), int(roll))
-            time.sleep(0.1)
 
 
 if __name__ == "__main__":

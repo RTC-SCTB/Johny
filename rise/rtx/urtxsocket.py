@@ -72,6 +72,8 @@ class SocketUrtx(threading.Thread):
         while not self.__exit:
             if self._connected:
                 self._readPackage()
+            else:
+                time.sleep(1)
 
     def subscribe(self, event, handler):
         ev = self._eventDict[event]

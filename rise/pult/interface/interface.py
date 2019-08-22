@@ -2,6 +2,9 @@ import json
 import datetime
 import gi
 
+from rise.devices.helmet import Helmet
+from rise.pult.robot import Johny
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -17,21 +20,29 @@ class _SettingsWindow:
         self._settingsChooserButton = self._builder.get_object("settingsChooserButton")
 
         self._settingsChooserButton.connect("file-set", self.__confFilePathChange)
+        self._calibrateButton.connect("clicked", self.__calibrateButtonClick)
+        self._videoSwitch.connect("state-set", self.__videoSwitchClick)
         self._settingsWindow.connect("delete-event", self.__delete_event)
+
+        self._calibrateButton.set_property("sensitive", self._owner.isConnected)
+        self._videoSwitch.set_property("sensitive", self._owner.isConnected)
+        self._settingsChooserButton.set_property("sensitive", not self._owner.isConnected)
+
         self._settingsWindow.show_all()
 
     def __calibrateButtonClick(self, w):
-        pass
+        self._owner.robot.calibrateHead()
 
     def __videoSwitchClick(self, w, state):
-        pass
+        self._owner.robot.videoState(state)
 
     def __confFilePathChange(self, w):
         try:
             self._owner.setConfigurationFromFile(w.get_uri()[6:])
-            self._owner._onoffButton.set_property("sensitive", True)
         except:
             self._owner.printLog("Ошибка чтения файла конфигурации, проверьте его корректность")
+        else:
+            self._owner._onoffButton.set_property("sensitive", True)
 
     def __delete_event(self, widget, event, data=None):
         self._owner._settingsButton.set_property("sensitive", True)
@@ -42,6 +53,9 @@ class Pult:
         """ развертываем интерфейс из glade """
         self._defaultConfigurationFilePath = "conf.json"
         self._configuration = None
+        self.isConnected = False
+        self.robot = Johny(None)
+        self._helmet = Helmet()
 
         self._builder = Gtk.Builder()
         self._builder.add_from_file("rise/pult/interface/interface.glade")
@@ -55,17 +69,18 @@ class Pult:
         self._joystickIndicator = self._builder.get_object("joystickIndicator")
         self._mainWindow.connect("delete-event", self.__delete_event)
 
-        self._onoffButton.connect("clicked", self.__onoffButtonClick)
+        self._onoffButton.connect("toggled", self.__onoffButtonClick)
         self._settingsButton.connect("clicked", self.__settingsButtonClick)
         # self.printLog("*** Hello, I'm Johny! ***")
 
         try:
             self.setConfigurationFromFile(self._defaultConfigurationFilePath)
-            self._onoffButton.set_property("sensitive", True)
         except FileNotFoundError:
             self.printLog("Файл конфигурации по умолчанию не найден, проверьте его наличие или выберете другой")
         except:
             self.printLog("Ошибка чтения файла конфигурации, проверьте его корректность")
+        else:
+            self._onoffButton.set_property("sensitive", True)
 
         self._mainWindow.show_all()
         Gtk.main()
@@ -75,7 +90,20 @@ class Pult:
         self._logTextview.get_buffer().insert(end_iter, str(datetime.datetime.now()) + "\t" + string + "\n")
 
     def __onoffButtonClick(self, w):
-        pass
+        state = w.get_active()
+        if state:
+            try:
+                self.robot.connect()
+                self.isConnected = True
+            except ConnectionError:
+                self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
+                w.set_active(False)
+        else:
+            try:
+                self.robot.disconnect()
+                self.isConnected = False
+            except BrokenPipeError:
+                self.printLog("Связь была прервана")
 
     def __settingsButtonClick(self, w):
         self._settingsButton.set_property("sensitive", False)
@@ -87,4 +115,9 @@ class Pult:
     def setConfigurationFromFile(self, path):
         with open(path, "r") as file:
             self._configuration = json.load(file)
+            try:
+                self.robot.host = (self._configuration["ip"], self._configuration["port"])
+            except KeyError:
+                self.printLog("Файл конфигурации не содержит адрес робота")
+                raise KeyError()
 

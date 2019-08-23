@@ -30,6 +30,7 @@ from rise.cannet.bot import Robot
 from rise.board.robothandle import JohnyHandle
 from rise.rtx.urtxsocket import TcpServer
 
+
 bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
 robot = Robot(bus)
 robot.online = True

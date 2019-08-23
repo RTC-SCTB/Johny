@@ -42,11 +42,8 @@ class Johny:
         self._client.subscribe("onReceive", self.__onReceive)
         self._client.connect(host=self.host)
         self._client.start()
-        self.videoState(True)
-        self.calibrateHead()
 
     def disconnect(self):
-        self.videoState(False)
         self._client.disconnect()
         del self._client
         self._client = None
@@ -56,9 +53,6 @@ class Johny:
 
     def calibrateHead(self):
         self._client.sendPackage(3, ())
-
-    def exit(self):
-        self.__exit = True
 
     def videoState(self, state):
         if state:

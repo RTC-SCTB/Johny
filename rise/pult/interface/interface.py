@@ -1,7 +1,8 @@
 import json
 import datetime
 import gi
-
+import  threading
+import time
 from rise.devices.helmet import Helmet
 from rise.pult.robot import Johny
 
@@ -54,6 +55,7 @@ class Pult:
         self._defaultConfigurationFilePath = "conf.json"
         self._configuration = None
         self._isConnected = False
+        self.__exit = False
         self.robot = Johny(None)
         self._helmet = Helmet()
 
@@ -82,6 +84,7 @@ class Pult:
         else:
             self._onoffButton.set_property("sensitive", True)
 
+        threading.Thread(daemon=True, target=self.__cyclicSending).start()  # запускаем поток циклических отправок данных
         self._mainWindow.show_all()
         Gtk.main()
 
@@ -96,14 +99,16 @@ class Pult:
     def __onoffButtonClick(self, w):
         state = w.get_active()
         if state:
-            #try:
+            try:
                 self.robot.connect()
+                self.__robotOn()
                 self._isConnected = True
-            #except ConnectionError:
-                #self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
-                #w.set_active(False)
+            except ConnectionError:
+                self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
+                w.set_active(False)
         else:
             try:
+                self.__robotOff()
                 self.robot.disconnect()
                 self._isConnected = False
             except BrokenPipeError:
@@ -125,3 +130,26 @@ class Pult:
                 self.printLog("Файл конфигурации не содержит адрес робота")
                 raise KeyError()
 
+    def __robotOn(self):
+        """ вызывается после соединения с роботом """
+        self.robot.calibrateHead()
+        self.robot.videoState(True)
+        self._helmet.setZeroNow()
+
+    def __robotOff(self):
+        """ вызывается перед разъединением с роботом """
+        self.robot.videoState(False)
+
+    def __cyclicSending(self):
+        while not self.__exit:
+            if self._isConnected:
+                try:
+                    yaw, pitch, roll = self._helmet.getAngles()
+                    self.robot.setHeadPosition(int(yaw), int(pitch), int(roll))
+                except:
+                    pass
+                try:
+                    pass    # TODO: управление с джойстика
+                except:
+                    pass
+            time.sleep(0.1)

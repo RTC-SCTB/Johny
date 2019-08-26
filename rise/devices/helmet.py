@@ -11,7 +11,6 @@ class Helmet:
     """ Класс шлема VR """
     def __init__(self):
         self._hmd = PyOpenHMD()
-        self._zeroAngles = [0, 0, 0]    # начальные углы
 
     def getRawAngles(self):
         # TODO: перенести это все в СИшный код
@@ -23,13 +22,13 @@ class Helmet:
         return yaw, pitch, roll
 
     def getAngles(self):
-        za = self._zeroAngles
         yaw, pitch, roll = self.getRawAngles()
-        return yaw - za[0], pitch - za[1], roll - za[2]
+        return yaw, pitch, roll
 
     def setZeroNow(self):
         """ установка начального значения по текущим значениям с очков """
-        self._zeroAngles = self.getRawAngles()
+        self._hmd.setZero()
+        #self._zeroAngles = self.getRawAngles()
 
 
 if __name__ == "__main__":

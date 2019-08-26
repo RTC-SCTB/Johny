@@ -1,10 +1,11 @@
 import json
 import datetime
 import gi
-import  threading
+import threading
 import time
 from rise.devices.helmet import Helmet
 from rise.pult.robot import Johny
+from rise.devices.joystick import Joystick
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -57,6 +58,7 @@ class Pult:
         self._isConnected = False
         self.__exit = False
         self.robot = Johny(None)
+        self._joystick = None
         self._helmet = Helmet()
 
         self._builder = Gtk.Builder()
@@ -84,7 +86,8 @@ class Pult:
         else:
             self._onoffButton.set_property("sensitive", True)
 
-        threading.Thread(daemon=True, target=self.__cyclicSending).start()  # запускаем поток циклических отправок данных
+        threading.Thread(daemon=True,
+                         target=self.__cyclicSending).start()  # запускаем поток циклических отправок данных
         self._mainWindow.show_all()
         Gtk.main()
 
@@ -100,6 +103,10 @@ class Pult:
         state = w.get_active()
         if state:
             try:
+                self.__openJoystick(self._configuration["joystick"]["path"])
+            except:
+                self.printLog("Не удалось открыть джойстик")
+            try:
                 self.robot.connect()
                 self.__robotOn()
                 self._isConnected = True
@@ -113,6 +120,7 @@ class Pult:
                 self._isConnected = False
             except BrokenPipeError:
                 self.printLog("Связь была прервана")
+            self.__closeJoystick()
 
     def __settingsButtonClick(self, w):
         self._settingsButton.set_property("sensitive", False)
@@ -122,12 +130,32 @@ class Pult:
         Gtk.main_quit()
 
     def setConfigurationFromFile(self, path):
+        temp = None
         with open(path, "r") as file:
             self._configuration = json.load(file)
             try:
-                self.robot.host = (self._configuration["ip"], self._configuration["port"])
+                self.robot.host = (self._configuration["robot"]["ip"], self._configuration["robot"]["port"])
             except KeyError:
                 self.printLog("Файл конфигурации не содержит адрес робота")
+                raise KeyError()
+            try:
+                _ = self._configuration["joystick"]["path"]
+            except KeyError:
+                self.printLog("Файл конфигурации не содержит имя джойстика")
+                raise KeyError()
+            try:
+                temp = "ROTATE_AXIS"
+                _ = self._configuration["joystick"][temp]
+                temp = "MOVE_AXIS"
+                _ = self._configuration["joystick"][temp]
+                temp = "ROTATE_AXIS_PRESC"
+                _ = self._configuration["joystick"][temp]
+                temp = "MOVE_AXIS_PRESC"
+                _ = self._configuration["joystick"][temp]
+                temp = "SET_HELMET_ZERO_BTN"
+                _ = self._configuration["joystick"][temp]
+            except:
+                self.printLog("В файле конфигурации не назначено значение для " + temp)
                 raise KeyError()
 
     def __robotOn(self):
@@ -140,16 +168,35 @@ class Pult:
         """ вызывается перед разъединением с роботом """
         self.robot.videoState(False)
 
+    def __openJoystick(self, path):
+        self._joystick = Joystick()
+        self._joystick.open(path)
+        self._joystick.onButtonClick(self._configuration["joystick"]["SET_HELMET_ZERO_BTN"],
+                                     lambda x: self._helmet.setZeroNow() if x else None)
+        self._joystick.start()
+
+    def __closeJoystick(self):
+        self._joystick.exit()
+        del self._joystick
+        self._joystick = None
+
     def __cyclicSending(self):
+        i = 0
         while not self.__exit:
             if self._isConnected:
                 try:
                     yaw, pitch, roll = self._helmet.getAngles()
                     self.robot.setHeadPosition(int(yaw), int(pitch), int(roll))
-                except:
-                    pass
+                except Exception as e:
+                    self.printLog("Ошибка при отправке пакета с данными углов головы робота: " + e.__repr__())
                 try:
-                    pass    # TODO: управление с джойстика
-                except:
-                    pass
+                    if i > 4:   # в 3 раза меньше пакетов шлется
+                        self.robot.move(self._configuration["joystick"]["MOVE_AXIS_PRESC"] * \
+                                        self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]])
+                        self.robot.rotate(self._configuration["joystick"]["ROTATE_AXIS_PRESC"] * \
+                                          self._joystick.axis[self._configuration["joystick"]["ROTATE_AXIS"]])
+                        i = 0
+                    i = i + 1
+                except Exception as e:
+                    self.printLog("Ошибка при отправке пакета с данными движения робота: " + e.__repr__())
             time.sleep(0.1)

@@ -1,4 +1,14 @@
 {
-  "ip": "127.0.0.1",
-  "port": 9009
+  "robot": {
+    "ip": "127.0.0.1",
+    "port": 9009
+  },
+  "joystick": {
+    "path": "/dev/input/js0",
+    "ROTATE_AXIS": "hat0x",
+    "MOVE_AXIS": "hat0y",
+    "SET_HELMET_ZERO_BTN": "select",
+    "ROTATE_AXIS_PRESC": -1,
+    "MOVE_AXIS_PRESC": -1
+  }
 }

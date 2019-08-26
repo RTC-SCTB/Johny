@@ -61,6 +61,14 @@ class Johny:
             self._video.stop()
         self._client.sendPackage(4, (bool(state),))
 
+    def move(self, scale):
+        speed = scale  # TODO: scale to speed
+        self._client.sendPackage(5, (int(speed),))
+
+    def rotate(self, scale):
+        speed = scale    # TODO: scale to speed
+        self._client.sendPackage(6, (int(speed),))
+
 
 if __name__ == "__main__":
     import random

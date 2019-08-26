@@ -31,3 +31,11 @@ class JohnyHandle:
         """ калибровка головы робота """
         self._head.calibrate()
 
+    def move(self, speed):
+        """ движение вперед/назад """
+        pass    # TODO: !!!
+
+    def rotate(self, speed):
+        """ поворот на месте """
+        pass
+

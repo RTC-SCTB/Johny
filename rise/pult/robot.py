@@ -34,6 +34,9 @@ class Johny:
                  "time": datetime.datetime.now(),  # время ошибки
                  "desc": errorDict.get(data[0])}  # описание
 
+        for err in self.errorList:      # если такая ошибка уже есть
+            if (error["num"] == err["num"]) and (error["dlc"] == err["dlc"]):
+                return
         self.errorList.append(error)
 
     def connect(self):

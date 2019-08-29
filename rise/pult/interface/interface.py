@@ -68,9 +68,9 @@ class Pult:
         self._onoffButton = self._builder.get_object("onoffButton")
         self._settingsButton = self._builder.get_object("settingsButton")
         self._logTextview = self._builder.get_object("logTextview")
-        self._robotIndicator = self._builder.get_object("robotIndicator")
-        self._helmetIndicator = self._builder.get_object("helmetIndicator")
-        self._joystickIndicator = self._builder.get_object("joystickIndicator")
+        #self._robotIndicator = self._builder.get_object("robotIndicator")
+        #self._helmetIndicator = self._builder.get_object("helmetIndicator")
+        #self._joystickIndicator = self._builder.get_object("joystickIndicator")
         self._mainWindow.connect("delete-event", self.__delete_event)
 
         self._onoffButton.connect("toggled", self.__onoffButtonClick)
@@ -88,6 +88,8 @@ class Pult:
 
         threading.Thread(daemon=True,
                          target=self.__cyclicSending).start()  # запускаем поток циклических отправок данных
+        threading.Thread(daemon=True,
+                         target=self.__cyclicCheckError).start()   # запускаем поток циклической проверки ошибок
         self._mainWindow.show_all()
         Gtk.main()
 
@@ -115,9 +117,9 @@ class Pult:
                 w.set_active(False)
         else:
             try:
+                self._isConnected = False
                 self.__robotOff()
                 self.robot.disconnect()
-                self._isConnected = False
             except BrokenPipeError:
                 self.printLog("Связь была прервана")
             self.__closeJoystick()
@@ -169,11 +171,23 @@ class Pult:
         self.robot.videoState(False)
 
     def __openJoystick(self, path):
+        temp = None
         self._joystick = Joystick()
         self._joystick.open(path)
-        self._joystick.onButtonClick(self._configuration["joystick"]["SET_HELMET_ZERO_BTN"],
-                                     lambda x: self._helmet.setZeroNow() if x else None)
-        self._joystick.start()
+        try:
+            temp = self._configuration["joystick"]["SET_HELMET_ZERO_BTN"]
+            _ = self._joystick.buttons[temp]
+            temp = self._configuration["joystick"]["ROTATE_AXIS"]
+            _ = self._joystick.axis[temp]
+            temp = self._configuration["joystick"]["MOVE_AXIS"]
+            _ = self._joystick.axis[temp]
+        except:
+            self.printLog("Не получается найти на джойстике: " + temp)
+            self.__closeJoystick()
+        else:
+            self._joystick.onButtonClick(self._configuration["joystick"]["SET_HELMET_ZERO_BTN"],
+                                         lambda x: self._helmet.setZeroNow() if x else None)
+            self._joystick.start()
 
     def __closeJoystick(self):
         self._joystick.exit()
@@ -187,6 +201,9 @@ class Pult:
                 try:
                     yaw, pitch, roll = self._helmet.getAngles()
                     self.robot.setHeadPosition(int(yaw), int(pitch), int(roll))
+                except BrokenPipeError:
+                    self.printLog("Ошибка при отправке пакета с данными углов головы робота")
+                    self._onoffButton.set_active(False)
                 except Exception as e:
                     self.printLog("Ошибка при отправке пакета с данными углов головы робота: " + e.__repr__())
                 try:
@@ -197,6 +214,22 @@ class Pult:
                                           self._joystick.axis[self._configuration["joystick"]["ROTATE_AXIS"]])
                         i = 0
                     i = i + 1
+                except BrokenPipeError:
+                    self.printLog("Ошибка при отправке пакета с данными движения робота")
+                    self._onoffButton.set_active(False)
                 except Exception as e:
                     self.printLog("Ошибка при отправке пакета с данными движения робота: " + e.__repr__())
             time.sleep(0.1)
+
+    def __cyclicCheckError(self):
+        while not self.__exit:
+            try:
+                for error in self.robot.errorList:
+                    end_iter = self._logTextview.get_buffer().get_end_iter()  # получение итератора конца строки
+                    self._logTextview.get_buffer().insert(end_iter, str(error["time"]) + "\t" +   \
+                                                          error["num"].__repr__() + "/" + error["dlc"].__repr__() + \
+                                                          "\t" + error["desc"] + "\n")
+                self.robot.errorList.clear()
+            except:
+                self.printLog("Произошла ошибка при сканировании ошибок")
+            time.sleep(3)

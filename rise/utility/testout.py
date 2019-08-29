@@ -5,12 +5,13 @@ import sys
 import time
 Gst.init(sys.argv)
 
-s = """rtpbin name=rtpbin buffer-mode=1 v4l2src device=/dev/video0 !
-image/jpeg, width=(int)1280, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1 !
-rtpjpegpay ! rtpbin.send_rtp_sink_0 rtpbin.send_rtp_src_0 !
+s = """rtpbin name=rtpbin v4l2src device=/dev/video0 !
+video/x-raw, width=(int)1280, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1, encoding-name=(string)JPEG !
+jpegenc ! rtpjpegpay ! rtpbin.send_rtp_sink_0 rtpbin.send_rtp_src_0 !
 udpsink port=5000 host=127.0.0.1 name=vrtpsink_l rtpbin.send_rtcp_src_0 !
-udpsink port=5001 host=$DEST sync=false async=false name=vrtcpsink_l udpsrc port=5005 name=vrtcpsrc_l ! rtpbin.recv_rtcp_sink_0"""
-pipeline = Gst.parse_launch(s) 
+udpsink port=5001 host=127.0.0.1 sync=false async=false name=vrtcpsink_l udpsrc port=5005 name=vrtcpsrc_l ! rtpbin.recv_rtcp_sink_0"""
+
+pipeline = Gst.parse_launch(s)
 pipeline.set_state(Gst.State.PLAYING)
 time.sleep(10)
 pipeline.set_state(Gst.State.NULL)

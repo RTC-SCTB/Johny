@@ -20,10 +20,10 @@ class JohnyHandle:
         """ Установка позиции головы робота """
         self._head.setAllPosition(angle0, angle1, angle2)
 
-    def setVideoState(self, state):
+    def setVideoState(self, dev, host, state):
         """ включение/выключение видео """
         if state:
-            self._video.start(VIDEO_OUT_LAUNCH)
+            self._video.start(VIDEO_OUT_LAUNCH.format(device=dev, ip=host[0]))
         else:
             self._video.stop()
 

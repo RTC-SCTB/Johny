@@ -6,11 +6,11 @@ DEST=127.0.0.1
 
 VELEM_L="v4l2src device=/dev/video0"
 
-#VCAPS="image/jpeg, width=(int)1280, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1"
-VCAPS="video/x-raw, width=(int)1280, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1, encoding-name=(string)JPEG"
+VCAPS="image/jpeg, width=(int)1280, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1"
+#VCAPS="video/x-raw, width=(int)1280, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1, encoding-name=(string)JPEG"
 #VCAPS="image/jpeg, width=(int)640, height=(int)480, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1"
 #VCAPS="image/jpeg, width=(int)320, height=(int)240, pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)30/1"
-VENC="jpegenc ! rtpjpegpay"
+VENC="jpegdec ! jpegenc ! rtpjpegpay"
 
 VRTPSINK_L="udpsink port=5000 host=$DEST name=vrtpsink_l"
 VRTCPSINK_L="udpsink port=5001 host=$DEST sync=false async=false name=vrtcpsink_l"

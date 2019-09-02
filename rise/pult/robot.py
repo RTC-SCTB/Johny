@@ -59,7 +59,7 @@ class Johny:
 
     def videoState(self, state):
         if state:
-            self._video.start(VIDEO_IN_LAUNCH)
+            self._video.start(VIDEO_IN_LAUNCH.format(ip=self.host[0]))
         else:
             self._video.stop()
         self._client.sendPackage(4, (bool(state),))

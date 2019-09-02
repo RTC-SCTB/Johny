@@ -5,13 +5,17 @@ import time
 from rise.cannet.bot import Robot
 from rise.board.robothandle import JohnyHandle
 from rise.rtx.urtxsocket import TcpServer
+import json
 
+configuration = {}
+with open("rise/board/robotconf.json", "r") as file:
+    configuration = json.load(file)
 
 bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
 robot = Robot(bus)
 robot.online = True
 server = TcpServer()
-server.open(("", 9009))
+server.open(("", configuration["port"]))
 jh = JohnyHandle(robot)
 
 
@@ -39,7 +43,7 @@ def recvPosition(data):
 
 
 def recvVideoState(data):
-    jh.setVideoState(bool(data[0]))
+    jh.setVideoState(configuration["videodevice"], (configuration["videohost"], ), bool(data[0]))
 
 
 def recvMove(data):

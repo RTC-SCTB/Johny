@@ -43,7 +43,8 @@ def recvPosition(data):
 
 
 def recvVideoState(data):
-    jh.setVideoState(configuration["videodevice"], (configuration["videohost"], ), bool(data[0]))
+    print(server.clientAddr)
+    jh.setVideoState(configuration["videodevice"], server.clientAddr, bool(data[0]))
 
 
 def recvMove(data):
@@ -74,4 +75,3 @@ jh.start()
 
 while True:
     server.connect(None)    # подключаемся в цикле, т.к. один раз запускаем скрипт на все время работы робота
-

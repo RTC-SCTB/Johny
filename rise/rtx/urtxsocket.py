@@ -78,13 +78,14 @@ class TcpServer(SocketUrtx):
     """ Сервер, написанный на основе SocketUrtx """
     def __init__(self, **kwargs):
         SocketUrtx.__init__(self, type=socket.SOCK_STREAM, **kwargs)
+        self.clientAddr = None
 
     def open(self, host):
         self._sock.bind(host)
         self._sock.listen(1)
 
     def _connect(self, host):
-        self.__rec, _ = self._sock.accept()
+        self.__rec, self.clientAddr = self._sock.accept()
         self.__rec.settimeout(3.0)
 
     def _readArray(self, size):

@@ -37,6 +37,7 @@ class _SettingsWindow:
 
     def __videoSwitchClick(self, w, state):
         self._owner.robot.videoState(state)
+        time.sleep(1)
 
     def __confFilePathChange(self, w):
         try:

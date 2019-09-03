@@ -104,6 +104,7 @@ class TcpServer(SocketUrtx):
 class TcpClient(SocketUrtx):
     def __init__(self, **kwargs):
         SocketUrtx.__init__(self, type=socket.SOCK_STREAM, **kwargs)
+        self._sock.settimeout(5)
 
     def _connect(self, host):
         self._sock.connect(host)

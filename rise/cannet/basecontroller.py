@@ -1,3 +1,5 @@
+import time
+
 from rise.cannet import protocan
 import struct
 
@@ -36,6 +38,7 @@ class BaseController:
 
         msg = protocan.getDefaultMessage(self._addr, package)  # получаем сообщение
         self._owner.send(msg)  # отправляем его
+        time.sleep(0.1)
 
     def sendCommand(self, cmdNum, *cmdParams):
         """ Отправка комманды на контроллер """

@@ -1,4 +1,5 @@
 {
+  "candevice": "/dev/ttyUSB0",
   "port": 9009,
   "videodevice": "/dev/video0"
 }

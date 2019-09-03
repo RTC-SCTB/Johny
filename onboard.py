@@ -5,13 +5,16 @@ import time
 from rise.cannet.bot import Robot
 from rise.board.robothandle import JohnyHandle
 from rise.rtx.urtxsocket import TcpServer
+from can.interfaces import seeedstudio
 import json
 
 configuration = {}
 with open("rise/board/robotconf.json", "r") as file:
     configuration = json.load(file)
 
-bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
+#bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
+bus = seeedstudio.SeeedBus(channel=configuration["candevice"])
+time.sleep(1)
 robot = Robot(bus)
 robot.online = True
 server = TcpServer()

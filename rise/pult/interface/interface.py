@@ -116,6 +116,9 @@ class Pult:
             except ConnectionError:
                 self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
                 w.set_active(False)
+            except Exception as e:
+                self.printLog(e.__str__())
+                w.set_active(False)
         else:
             try:
                 self._isConnected = False

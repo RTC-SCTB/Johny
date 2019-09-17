@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 import time
 from rise.rtx.urtxsocket import TcpClient
-import threading
-from rise.devices.helmet import Helmet
-from rise.utility.video import Video, VIDEO_IN_LAUNCH
+from rise.pult.GstCV import CVGstreamer
+# from rise.utility.video import Video, VIDEO_IN_LAUNCH
 import datetime
 
 # словаро с описанием ошибок по номеру ошибки
@@ -18,10 +17,24 @@ class Johny:
 
     def __init__(self, host):
         self._client = None
-        self.host = host
-        self._video = Video()
+        self._host = host
+        if host is not None:
+            self.video = CVGstreamer(IP=host[0], RTP_RECV_PORT=5000, RTCP_RECV_PORT=5001, RTCP_SEND_PORT=5005,
+                                      codec="JPEG", toAVS=False)
+        else:
+            self.video = CVGstreamer(IP=None, RTP_RECV_PORT=5000, RTCP_RECV_PORT=5001, RTCP_SEND_PORT=5005,
+                                      codec="JPEG", toAVS=False)
         self.__exit = False
         self.errorList = []
+
+    @property
+    def host(self):
+        return self._host
+
+    @host.setter
+    def host(self, value):
+        self._host = value
+        self.video.IP = value[0]
 
     def __onReceive(self, data):
         """ Хендлер - заглушка """
@@ -34,7 +47,7 @@ class Johny:
                  "time": datetime.datetime.now(),  # время ошибки
                  "desc": errorDict.get(data[0])}  # описание
 
-        for err in self.errorList:      # если такая ошибка уже есть
+        for err in self.errorList:  # если такая ошибка уже есть
             if (error["num"] == err["num"]) and (error["dlc"] == err["dlc"]):
                 return
         self.errorList.append(error)
@@ -59,9 +72,9 @@ class Johny:
 
     def videoState(self, state):
         if state:
-            self._video.start(VIDEO_IN_LAUNCH.format(ip=self.host[0]))
+            self.video.start()
         else:
-            self._video.stop()
+            self.video.stop()
         self._client.sendPackage(4, (bool(state),))
 
     def move(self, scale):
@@ -69,7 +82,7 @@ class Johny:
         self._client.sendPackage(5, (int(speed),))
 
     def rotate(self, scale):
-        speed = scale    # TODO: scale to speed
+        speed = scale  # TODO: scale to speed
         self._client.sendPackage(6, (int(speed),))
 
 

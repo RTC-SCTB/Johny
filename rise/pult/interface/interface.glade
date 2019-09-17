@@ -240,4 +240,13 @@
       </object>
     </child>
   </object>
+  <object class="GtkWindow" id="videoWindow">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkDrawingArea" id="videoDrawingArea">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+  </object>
 </interface>

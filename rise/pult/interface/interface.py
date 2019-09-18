@@ -3,26 +3,14 @@ import datetime
 import gi
 import threading
 import time
-import cairo
-import numpy
+
 
 from rise.devices.helmet import Helmet
 from rise.pult.robot import Johny
 from rise.devices.joystick import Joystick
-from PIL import Image
+from rise.pult.interface.videowindow import VideoWindow
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gdk
-
-
-def fullscreenAtMonitor(window, n):
-    screen = Gdk.Screen.get_default()
-    if screen.get_n_monitors() < 2:
-        raise ValueError("HDMI экран не найден")
-    monitorGeo = screen.get_monitor_geometry(n)
-    x = monitorGeo.x
-    y = monitorGeo.y
-    window.move(x, y)
-    window.fullscreen()
 
 
 class _SettingsWindow:
@@ -51,6 +39,18 @@ class _SettingsWindow:
 
     def __videoSwitchClick(self, w, state):
         self._owner.robot.videoState(state)
+        try:
+            if state:
+                if self._owner._videoWindow is None:
+                    self._owner._videoWindow = VideoWindow(self._owner._configuration["robot"]["ip"])
+                    self._owner._videoWindow.start()
+            else:
+                if self._owner._videoWindow is not None:
+                    self._owner._videoWindow.stop()
+                    del self._owner._videoWindow
+                    self._owner._videoWindow = None
+        except Exception as e:
+            self._owner.printLog("Произошла ошибка при работе с видео: " + str(e))
         time.sleep(2)
 
     def __confFilePathChange(self, w):
@@ -66,38 +66,6 @@ class _SettingsWindow:
 
     def destroy(self):
         self._settingsWindow.destroy()
-
-
-class VideoWindow:
-    def __init__(self, pult):
-        self._owner = pult
-        self._builder = Gtk.Builder()
-        self._builder.add_from_file("rise/pult/interface/interface.glade")
-        self._videoWindow = self._builder.get_object("videoWindow")
-        self._videoDrawingArea = self._builder.get_object("videoDrawingArea")
-        self._videoDrawingArea.connect("draw", self.__onDraw)
-        self._img = None
-
-        fullscreenAtMonitor(self._videoWindow, 1)   # на втором мониторе
-
-        self._videoWindow.show_all()
-
-    def __onDraw(self, w, cr):
-        if self._img is not None:
-            wa = w.get_allocation()
-            image = Image.fromarray(self._img, "RGB").resize((wa.width, wa.height), Image.ANTIALIAS)
-            image.putalpha(255)
-            arr = numpy.array(image, dtype=numpy.uint8)
-            surface = cairo.ImageSurface.create_for_data(arr, cairo.FORMAT_RGB24, wa.width, wa.height)
-            cr.set_source_surface(surface)
-            cr.paint()
-
-    def drawImage(self, image):
-        self._img = image
-        self._videoDrawingArea.queue_draw()
-
-    def destroy(self):
-        self._videoWindow.destroy()
 
 
 class Pult:
@@ -140,8 +108,6 @@ class Pult:
                          target=self.__cyclicSending).start()  # запускаем поток циклических отправок данных
         threading.Thread(daemon=True,
                          target=self.__cyclicCheckError).start()   # запускаем поток циклической проверки ошибок
-        threading.Thread(daemon=True,
-                         target=self.__cyclicDrawing).start()  # запускаем поток циклической отрисовки видео
         self._mainWindow.show_all()
         Gtk.main()
 
@@ -164,7 +130,8 @@ class Pult:
                 self.robot.connect()
                 self.__robotOn()
                 self._isConnected = True
-                self._videoWindow = VideoWindow(self)
+                self._videoWindow = VideoWindow(self._configuration["robot"]["ip"])
+                self._videoWindow.start()
             except ConnectionError:
                 self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
                 w.set_active(False)
@@ -178,9 +145,10 @@ class Pult:
                 self._isConnected = False
                 self.__robotOff()
                 self.robot.disconnect()
-                self._videoWindow.destroy()
-                del self._videoWindow
-                self._videoWindow = None
+                if self._videoWindow is not None:
+                    self._videoWindow.stop()
+                    del self._videoWindow
+                    self._videoWindow = None
             except BrokenPipeError:
                 self.printLog("Связь была прервана")
             self.__closeJoystick()
@@ -295,13 +263,3 @@ class Pult:
                 self.printLog("Произошла ошибка при сканировании ошибок")
             time.sleep(3)
 
-    def __cyclicDrawing(self):
-        while not self.__exit:
-            try:
-                if self._videoWindow is not None:
-                    if self.robot.video.cvImage is not None:
-                        self._videoWindow.drawImage(self.robot.video.cvImage)
-            except:
-                self.printLog("Произошла ошибка при воспроизведении видео")
-                time.sleep(3)
-            time.sleep(0.06)

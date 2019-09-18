@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import time
 from rise.rtx.urtxsocket import TcpClient
-from rise.pult.GstCV import CVGstreamer
 # from rise.utility.video import Video, VIDEO_IN_LAUNCH
 import datetime
 
@@ -17,24 +16,9 @@ class Johny:
 
     def __init__(self, host):
         self._client = None
-        self._host = host
-        if host is not None:
-            self.video = CVGstreamer(IP=host[0], RTP_RECV_PORT=5000, RTCP_RECV_PORT=5001, RTCP_SEND_PORT=5005,
-                                      codec="JPEG", toAVS=False)
-        else:
-            self.video = CVGstreamer(IP=None, RTP_RECV_PORT=5000, RTCP_RECV_PORT=5001, RTCP_SEND_PORT=5005,
-                                      codec="JPEG", toAVS=False)
+        self.host = host
         self.__exit = False
         self.errorList = []
-
-    @property
-    def host(self):
-        return self._host
-
-    @host.setter
-    def host(self, value):
-        self._host = value
-        self.video.IP = value[0]
 
     def __onReceive(self, data):
         """ Хендлер - заглушка """
@@ -71,10 +55,6 @@ class Johny:
         self._client.sendPackage(3, ())
 
     def videoState(self, state):
-        if state:
-            self.video.start()
-        else:
-            self.video.stop()
         self._client.sendPackage(4, (bool(state),))
 
     def move(self, scale):

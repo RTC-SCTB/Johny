@@ -19,6 +19,7 @@ class Johny:
         self.host = host
         self.__exit = False
         self.errorList = []
+        self.speed = 20
 
     def __onReceive(self, data):
         """ Хендлер - заглушка """
@@ -58,12 +59,10 @@ class Johny:
         self._client.sendPackage(4, (bool(state),))
 
     def move(self, scale):
-        speed = scale  # TODO: scale to speed
-        self._client.sendPackage(5, (int(speed),))
+        self._client.sendPackage(5, (int(self.speed * scale),))
 
     def rotate(self, scale):
-        speed = scale  # TODO: scale to speed
-        self._client.sendPackage(6, (int(speed),))
+        self._client.sendPackage(6, (int(self.speed * scale),))
 
 
 if __name__ == "__main__":

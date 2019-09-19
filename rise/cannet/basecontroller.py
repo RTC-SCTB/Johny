@@ -61,11 +61,11 @@ class BaseController:
         headSize = protocan.proto["headParamSize"]   # для сокращения размера кода
         prmNum, prmLen = struct.unpack(protocan.proto["headParamFormat"], msg.data[0:headSize])  # выделяем заголовок
         if prmNum not in self._paramDict.keys():    # смотрим емть ли данный параметр в списке параметров
-            raise ValueError("Пришедший параметр " + prmNum.__repr__() + "на данном контроллере отсутствует")
+            raise ValueError("Пришедший параметр " + prmNum.__repr__() + " на данном контроллере отсутствует")
 
         prmType = self._paramDict[prmNum][type]     # для сокращения размеров кода
         if prmLen != struct.calcsize(prmType):
-            raise ValueError("Длина пришедшего параметра на совпадает с действительной")
+            raise ValueError("Длина пришедшего параметра: " + prmNum.__repr__() + " не совпадает с действительной")
 
         data = struct.unpack(prmType, msg.data[headSize:headSize + prmLen])  # получаем данные и записываем их в словарь
         self._paramDict[prmNum]["activeValue"] = data

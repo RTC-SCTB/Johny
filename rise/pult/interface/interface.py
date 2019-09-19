@@ -127,6 +127,7 @@ class Pult:
             except:
                 self.printLog("Не удалось открыть джойстик")
             try:
+                self._helmet.reset()
                 self.robot.connect()
                 self.__robotOn()
                 self._isConnected = True
@@ -137,6 +138,7 @@ class Pult:
                 w.set_active(False)
             except ValueError:
                 self.printLog("Не удалось найти HDMI шлема VR")
+                w.set_active(False)
             except Exception as e:
                 self.printLog(e.__str__())
                 w.set_active(False)
@@ -149,9 +151,11 @@ class Pult:
                     self._videoWindow.stop()
                     del self._videoWindow
                     self._videoWindow = None
+                self.__closeJoystick()
             except BrokenPipeError:
                 self.printLog("Связь была прервана")
-            self.__closeJoystick()
+            except Exception as e:
+                self.printLog(e.__str__())
 
     def __settingsButtonClick(self, w):
         self._settingsButton.set_property("sensitive", False)
@@ -237,10 +241,12 @@ class Pult:
                     self.printLog("Ошибка при отправке пакета с данными углов головы робота: " + e.__repr__())
                 try:
                     if i > 4:   # в 3 раза меньше пакетов шлется
-                        self.robot.move(self._configuration["joystick"]["MOVE_AXIS_PRESC"] * \
-                                        self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]])
-                        self.robot.rotate(self._configuration["joystick"]["ROTATE_AXIS_PRESC"] * \
-                                          self._joystick.axis[self._configuration["joystick"]["ROTATE_AXIS"]])
+                        if abs(int(self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]] * 100)) > 0: # если ось немного битая, то умножаем на 100
+                            self.robot.move(self._configuration["joystick"]["MOVE_AXIS_PRESC"] * \
+                                            self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]])
+                        else:
+                            self.robot.rotate(self._configuration["joystick"]["ROTATE_AXIS_PRESC"] * \
+                                              self._joystick.axis[self._configuration["joystick"]["ROTATE_AXIS"]])
                         i = 0
                     i = i + 1
                 except BrokenPipeError:

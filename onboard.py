@@ -51,13 +51,13 @@ def recvVideoState(data):
 
 
 def recvMove(data):
+    print("move", data[0])
     jh.move(data[0])
-    print("move", data)
 
 
 def recvRotate(data):
+    print("rotate", data[0])
     jh.rotate(data[0])
-    print("rotate", data)
 
 
 def onReceive(data):

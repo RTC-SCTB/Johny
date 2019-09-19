@@ -36,32 +36,31 @@ class MotorController(BaseController):
             0x0A: {"name": 'emergency level', type: "H"},
 
             # Параметры только для чтения
+            0x12: {"name": 'PRM voltage', type: "f", "activeValue": None},
             0x13: {"name": 'Error Code', type: "B"},
             0x14: {"name": 'Work mode', type: "B"},
 
             # 1 мотор
-            0x15: {"name": 'pParrot1', type: "f"},
-            0x16: {"name": 'iParrot1', type: "f"},
-            0x17: {"name": 'dParrot1', type: "f"},
-            0x18: {"name": 'res PWM1', type: "H"},
-            0x19: {"name": 'current Parrot1', type: "H"},
-            0x1A: {"name": 'encoder Data1', type: "i"},
-            0x1B: {"name": 'Int summ1', type: "h"},
-            0x1C: {"name": 'adc Average1', type: "H"},
-            0x1D: {"name": 'set Parrot1', type: "h"},
-            0x1E: {"name": 'set PWM1', type: "h"},
+            0x15: {"name": 'PRM_P_A', type: "f"},
+            0x16: {"name": 'PRM_I_A', type: "f"},
+            0x17: {"name": 'PRM_D_A', type: "f"},
+            0x18: {"name": 'PRM_INT_SUMM_A', type: "i"},
+            0x19: {"name": 'PRM_PWM_A', type: "h"},
+            0x1A: {"name": 'PRM_PARROT_A', type: "h"},
+            0x1B: {"name": 'PRM_ODOM_A', type: "i"},
+            0x1C: {"name": 'PRM_SET_PARROT_A', type: "h"},
+            0x1D: {"name": 'PRM_SET_PWM_A', type: "h"},
 
             # 2 мотор
-            0x1F: {"name": 'pParrot2', type: "f"},
-            0x20: {"name": 'iParrot2', type: "f"},
-            0x21: {"name": 'dParrot2', type: "f"},
-            0x22: {"name": 'res PWM2', type: "h"},
-            0x23: {"name": 'current Parrot2', type: "h"},
-            0x24: {"name": 'encoder Data2', type: "i"},
-            0x25: {"name": 'Int summ2', type: "h"},
-            0x26: {"name": 'adc Average2', type: "H"},
-            0x27: {"name": 'set Parrot2', type: "h"},
-            0x28: {"name": 'set PWM2', type: "h"}
+            0x1E: {"name": 'PRM_P_B', type: "f"},
+            0x1F: {"name": 'PRM_I_B', type: "f"},
+            0x20: {"name": 'PRM_D_B', type: "f"},
+            0x21: {"name": 'PRM_INT_SUMM_B', type: "i"},
+            0x22: {"name": 'PRM_PWM_B', type: "h"},
+            0x23: {"name": 'PRM_PARROT_B', type: "h"},
+            0x24: {"name": 'PRM_ODOM_B', type: "i"},
+            0x25: {"name": 'PRM_SET_PARROT_B', type: "h"},
+            0x26: {"name": 'PRM_SET_PWM_B', type: "h"}
         })
 
     def setWorkMode(self, workMode=WorkMode.NONE):  # Инициализация режима работы (2 - ШИМ, 1 - ПИД, 0 - пока
@@ -76,3 +75,6 @@ class MotorController(BaseController):
 
     def setMotorPwm(self, motorNum, pwm):
         self.sendCommand(0xCF, (motorNum, pwm))
+
+    def getActiveVoltage(self):
+        return self.getParamByNum(0x12)

@@ -51,7 +51,7 @@ class Head:
     def setAllPosition(self, *angles):
         """ Устанавливает позицию моторов в положение по заданному углу в градусах"""
         position = [0, 0, 0]
-        angles = [angles[1], angles[0], angles[2]]  # разворачиваем кортеж в список и сразу меняем углы соответсвтенно моторам
+        angles = [angles[0], angles[2], angles[1]]  # разворачиваем кортеж в список и сразу меняем углы соответсвтенно моторам
         ar = self._anglesRange  # для сокращения кода
         pr = (self._stepController.getParamByNum(0x0D)[0],  # верхний предел допустимого поворота в попугаях(нижний
               self._stepController.getParamByNum(0x1A)[0],  # предел равен 0)

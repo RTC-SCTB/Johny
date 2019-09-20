@@ -4,11 +4,11 @@ import gi
 import threading
 import time
 
-
 from rise.devices.helmet import Helmet
 from rise.pult.robot import Johny
 from rise.devices.joystick import Joystick
 from rise.pult.interface.videowindow import VideoWindow
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gdk
 
@@ -107,7 +107,7 @@ class Pult:
         threading.Thread(daemon=True,
                          target=self.__cyclicSending).start()  # запускаем поток циклических отправок данных
         threading.Thread(daemon=True,
-                         target=self.__cyclicCheckError).start()   # запускаем поток циклической проверки ошибок
+                         target=self.__cyclicCheckError).start()  # запускаем поток циклической проверки ошибок
         self._mainWindow.show_all()
         Gtk.main()
 
@@ -189,6 +189,12 @@ class Pult:
                 _ = self._configuration["joystick"][temp]
                 temp = "SET_HELMET_ZERO_BTN"
                 _ = self._configuration["joystick"][temp]
+                temp = "ADD_SPEED_BTN"
+                _ = self._configuration["joystick"][temp]
+                temp = "SUB_SPEED_BTN"
+                _ = self._configuration["joystick"][temp]
+                temp = "SPEED_CHANGE_STEP"
+                _ = self._configuration["joystick"][temp]
             except:
                 self.printLog("В файле конфигурации не назначено значение для " + temp)
                 raise KeyError()
@@ -210,6 +216,10 @@ class Pult:
         try:
             temp = self._configuration["joystick"]["SET_HELMET_ZERO_BTN"]
             _ = self._joystick.buttons[temp]
+            temp = self._configuration["joystick"]["ADD_SPEED_BTN"]
+            _ = self._joystick.buttons[temp]
+            temp = self._configuration["joystick"]["SUB_SPEED_BTN"]
+            _ = self._joystick.buttons[temp]
             temp = self._configuration["joystick"]["ROTATE_AXIS"]
             _ = self._joystick.axis[temp]
             temp = self._configuration["joystick"]["MOVE_AXIS"]
@@ -220,6 +230,12 @@ class Pult:
         else:
             self._joystick.onButtonClick(self._configuration["joystick"]["SET_HELMET_ZERO_BTN"],
                                          lambda x: self._helmet.setZeroNow() if x else None)
+            self._joystick.onButtonClick(self._configuration["joystick"]["ADD_SPEED_BTN"],
+                                         lambda x: self.robot.addToSpeed(
+                                             self._configuration["joystick"]["SPEED_CHANGE_STEP"]) if x else None)
+            self._joystick.onButtonClick(self._configuration["joystick"]["SUB_SPEED_BTN"],
+                                         lambda x: self.robot.addToSpeed(
+                                             -self._configuration["joystick"]["SPEED_CHANGE_STEP"]) if x else None)
             self._joystick.start()
 
     def __closeJoystick(self):
@@ -240,8 +256,9 @@ class Pult:
                 except Exception as e:
                     self.printLog("Ошибка при отправке пакета с данными углов головы робота: " + e.__repr__())
                 try:
-                    if i > 4:   # в 3 раза меньше пакетов шлется
-                        if abs(int(self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]] * 100)) > 0: # если ось немного битая, то умножаем на 100
+                    if i > 4:  # в 3 раза меньше пакетов шлется
+                        if abs(int(self._joystick.axis[self._configuration["joystick"][
+                            "MOVE_AXIS"]] * 100)) > 0:  # если ось немного битая, то умножаем на 100
                             self.robot.move(self._configuration["joystick"]["MOVE_AXIS_PRESC"] * \
                                             self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]])
                         else:
@@ -261,11 +278,10 @@ class Pult:
             try:
                 for error in self.robot.errorList:
                     end_iter = self._logTextview.get_buffer().get_end_iter()  # получение итератора конца строки
-                    self._logTextview.get_buffer().insert(end_iter, str(error["time"]) + "\t" +   \
+                    self._logTextview.get_buffer().insert(end_iter, str(error["time"]) + "\t" + \
                                                           error["num"].__repr__() + "/" + error["dlc"].__repr__() + \
                                                           "\t" + error["desc"] + "\n")
                 self.robot.errorList.clear()
             except:
                 self.printLog("Произошла ошибка при сканировании ошибок")
             time.sleep(3)
-

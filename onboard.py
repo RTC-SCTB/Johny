@@ -46,17 +46,14 @@ def recvPosition(data):
 
 
 def recvVideoState(data):
-    print(server.clientAddr)
     jh.setVideoState(configuration["videodevice"], server.clientAddr, bool(data[0]))
 
 
 def recvMove(data):
-    print("move", data[0])
     jh.move(data[0])
 
 
 def recvRotate(data):
-    print("rotate", data[0])
     jh.rotate(data[0])
 
 

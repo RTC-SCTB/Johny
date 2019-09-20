@@ -64,6 +64,9 @@ class Johny:
     def rotate(self, scale):
         self._client.sendPackage(6, (int(self.speed * scale),))
 
+    def addToSpeed(self, value):
+        self.speed = min(max(0, self.speed + value), 100)
+
 
 if __name__ == "__main__":
     import random

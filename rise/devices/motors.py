@@ -14,7 +14,6 @@ class Motors:
         self._motorController.setWorkMode(WorkMode.PID)
         time.sleep(0.1)
 
-
     def move(self, speed):
         """ Движение вперед/назад """
         speed = min(max(-100, speed), 100)
@@ -38,7 +37,7 @@ if __name__ == "__main__":
     time.sleep(2)
     robot = Robot(bus)
     robot.online = True
-    mot = MotorController(robot, 0x399)
+    mot = MotorController(robot, 0x200)
     robot.addDevice(mot)
     robot.start()
     motors = Motors(mot)

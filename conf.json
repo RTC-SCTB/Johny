@@ -8,6 +8,9 @@
     "ROTATE_AXIS": "hat0x",
     "MOVE_AXIS": "hat0y",
     "SET_HELMET_ZERO_BTN": "select",
+    "ADD_SPEED_BTN": "tr",
+    "SUB_SPEED_BTN": "tl",
+    "SPEED_CHANGE_STEP": 10,
     "ROTATE_AXIS_PRESC": -1,
     "MOVE_AXIS_PRESC": -1
   }

@@ -245,6 +245,7 @@ class Pult:
 
     def __cyclicSending(self):
         i = 0
+        j = 0
         while not self.__exit:
             if self._isConnected:
                 try:
@@ -257,8 +258,8 @@ class Pult:
                     self.printLog("Ошибка при отправке пакета с данными углов головы робота: " + e.__repr__())
                 try:
                     if i > 4:  # в 3 раза меньше пакетов шлется
-                        if abs(int(self._joystick.axis[self._configuration["joystick"][
-                            "MOVE_AXIS"]] * 100)) > 0:  # если ось немного битая, то умножаем на 100
+                        if abs(int(self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]] * 100)) > 0:
+                            # если ось немного битая, то умножаем на 100
                             self.robot.move(self._configuration["joystick"]["MOVE_AXIS_PRESC"] * \
                                             self._joystick.axis[self._configuration["joystick"]["MOVE_AXIS"]])
                         else:
@@ -271,6 +272,16 @@ class Pult:
                     self._onoffButton.set_active(False)
                 except Exception as e:
                     self.printLog("Ошибка при отправке пакета с данными движения робота: " + e.__repr__())
+                try:
+                    if j > 8:  # в 8 раз меньше пакетов шлется
+                        self.robot.sendOnline()
+                        j = 0
+                    j = j + 1
+                except BrokenPipeError:
+                    self.printLog("Ошибка при отправке пакета с онлайн меткой")
+                    self._onoffButton.set_active(False)
+                except Exception as e:
+                    self.printLog("Ошибка при отправке пакета с онлайн меткой: " + e.__repr__())
             time.sleep(0.1)
 
     def __cyclicCheckError(self):

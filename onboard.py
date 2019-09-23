@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import threading
+
 import can
 import time
 from rise.cannet.bot import Robot
@@ -12,7 +14,7 @@ configuration = {}
 with open("rise/board/robotconf.json", "r") as file:
     configuration = json.load(file)
 
-#bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
+# bus = can.interface.Bus(channel="can0", bustype='socketcan_native')
 bus = seeedstudio.SeeedBus(channel=configuration["candevice"])
 time.sleep(1)
 robot = Robot(bus)
@@ -57,11 +59,32 @@ def recvRotate(data):
     jh.rotate(data[0])
 
 
+def recvOnline(data):
+    global onlineCount
+    onlineCount = 0
+
+
 def onReceive(data):
     """ Хендлер - заглушка """
     pass
 
 
+global onlineCount
+onlineCount = 0
+
+
+def th():
+    global onlineCount
+    while True:
+        onlineCount += 1
+        if onlineCount > 3:
+            robot.online = False    # не шлем метки
+        else:
+            robot.online = True     # шлем метки
+        time.sleep(1)
+
+
+server.subscribe(0, recvOnline)
 server.subscribe(1, recvError)
 server.subscribe(2, recvPosition)
 server.subscribe(3, recvCalibrate)
@@ -72,6 +95,7 @@ server.subscribe("onReceive", onReceive)
 server.start()
 robot.start()
 jh.start()
+threading.Thread(daemon=True, target=th).start()
 
 while True:
-    server.connect(None)    # подключаемся в цикле, т.к. один раз запускаем скрипт на все время работы робота
+    server.connect(None)  # подключаемся в цикле, т.к. один раз запускаем скрипт на все время работы робота

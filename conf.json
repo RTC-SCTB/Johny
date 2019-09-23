@@ -1,7 +1,7 @@
 {
   "robot": {
     "ip": "127.0.0.1",
-    "port": 9008
+    "port": 9009
   },
   "joystick": {
     "path": "/dev/input/js0",

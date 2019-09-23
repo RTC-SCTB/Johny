@@ -1,0 +1,11 @@
+[Unit]
+Description=Johny server
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/pult/GitHub/Johny/autorun.sh
+
+[Install]
+WantedBy=multi-user.target
+

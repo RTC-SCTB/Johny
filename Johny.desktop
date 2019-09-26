@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Johny
 Comment=Johny pult
-Exec=pkexec /home/pult/GitHub/Johny/./pult.sh
+Exec=sudo /home/pult/GitHub/Johny/./pult.sh
 Terminal=false
 Type=Application
 Icon=/home/pult/GitHub/Johny/icon.png

@@ -6,7 +6,7 @@
 
 ```shell
 ~$ sudo apt install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
-gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools
+gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-omx libatlas-base-dev
 
 ~$ sudo apt install python3-gi python3-pip
 
@@ -42,13 +42,25 @@ sudo python3 setup.py install
 
 ```shell
 ~$ sudo apt install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
-gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools
+gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-omx libatlas-base-dev
 
 ~$ sudo apt install python3-gi python3-pip
 
 ~$ sudo pip3 install numpy
 ```    
 P.S. На 18.04 ubuntu возможно необходимо будет установить GTK3
++ В дополнение, если показывается, что HDMI-1 disconnected(что-то из этого должно помочь):
+```shell
+~$ sudo apt install arandr tasksel
+~$ sudo tasksel install ubuntu-desktop
+~$ sudo apt install libgtk-3-dev libva-dev mesa-va-drivers
+При включенном шлеме:
+~$ xrandr --output HDMI-1 --mode 2160x1200 --auto
+~$ sudo service gdm3 start
+~$ sudo apt update
+~$ sudo apt upgrade
+~$ sudo reboot now
+```   
 
 ##### Редактируем sudoers ([подробнее](https://help.ubuntu.ru/wiki/%D1%81%D1%83%D0%BF%D0%B5%D1%80%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C_%D0%B2_ubuntu))
 

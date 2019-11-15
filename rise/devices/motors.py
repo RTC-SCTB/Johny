@@ -17,12 +17,12 @@ class Motors:
     def move(self, speed):
         """ Движение вперед/назад """
         speed = min(max(-100, speed), 100)
-        self._motorController.setAllSpeed(speed, speed)
+        self._motorController.setAllSpeed(speed, -speed)
 
     def rotate(self, speed):
         """ поворот на месте (знак скорости = направление) """
         speed = min(max(-100, speed), 100)
-        self._motorController.setAllSpeed(speed, -speed)
+        self._motorController.setAllSpeed(speed, speed)
 
     @property
     def voltage(self):

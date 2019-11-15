@@ -12,6 +12,6 @@
     "SUB_SPEED_BTN": "tl",
     "SPEED_CHANGE_STEP": 10,
     "ROTATE_AXIS_PRESC": -1,
-    "MOVE_AXIS_PRESC": -1
+    "MOVE_AXIS_PRESC": 1
   }
 }

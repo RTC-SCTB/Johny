@@ -250,7 +250,7 @@ class Pult:
             if self._isConnected:
                 try:
                     yaw, pitch, roll = self._helmet.getAngles()
-                    self.robot.setHeadPosition(int(yaw), int(pitch), int(roll))
+                    self.robot.setHeadPosition(yaw, pitch, roll)
                 except BrokenPipeError:
                     self.printLog("Ошибка при отправке пакета с данными углов головы робота")
                     self._onoffButton.set_active(False)

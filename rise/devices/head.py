@@ -17,10 +17,10 @@ class Head:
     def start(self):
         """ Запускаем работу головы """
         # параметры для двигателя 0
-        self._stepController.setParamRequest(0x02, 150)  # Calibrate step length
-        self._stepController.setParamRequest(0x03, 20)  # Min step length
-        self._stepController.setParamRequest(0x04, 120)  # Max step length
-        self._stepController.setParamRequest(0x05, 1)  # Accel brake step
+        self._stepController.setParamRequest(0x02, 70)  # Calibrate step length
+        self._stepController.setParamRequest(0x03, 5)  # Min step length
+        self._stepController.setParamRequest(0x04, 80)  # Max step length
+        self._stepController.setParamRequest(0x05, 2)  # Accel brake step
         # параметры для двигателя 1
         self._stepController.setParamRequest(0x0F, 100)  # Calibrate step length
         self._stepController.setParamRequest(0x10, 20)  # Min step length

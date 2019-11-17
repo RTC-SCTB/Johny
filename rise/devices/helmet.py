@@ -12,7 +12,7 @@ class Helmet:
 
     def __init__(self):
         self._hmd = PyOpenHMD()
-        self._start = False     # флаг, означающий, что очки могут определять углы
+        self._start = True     # флаг, означающий, что очки могут определять углы
 
     def getRawAngles(self):
         # TODO: перенести это все в СИшный код

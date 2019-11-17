@@ -124,15 +124,19 @@ class Pult:
         if state:
             try:
                 self.__openJoystick(self._configuration["joystick"]["path"])
+                self.printLog("Джойстик подключен")
             except:
                 self.printLog("Не удалось открыть джойстик")
             try:
                 self._helmet.reset()
+                self.printLog("Попытка подключения к роботу с host:" + self.robot.host + "...")
                 self.robot.connect()
                 self.__robotOn()
                 self._isConnected = True
+                self.printLog("Попытка подключения удалась")
                 self._videoWindow = VideoWindow(self._configuration["robot"]["ip"])
                 self._videoWindow.start()
+                self.printLog("HDMI шлема VR найден и подключен")
             except ConnectionError:
                 self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
                 w.set_active(False)
@@ -147,6 +151,7 @@ class Pult:
                 self._isConnected = False
                 self.__robotOff()
                 self.robot.disconnect()
+                self.printLog("Робот отключен")
                 if self._videoWindow is not None:
                     self._videoWindow.stop()
                     del self._videoWindow

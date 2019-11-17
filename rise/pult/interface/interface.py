@@ -129,7 +129,7 @@ class Pult:
                 self.printLog("Не удалось открыть джойстик")
             try:
                 self._helmet.reset()
-                self.printLog("Попытка подключения к роботу с host:" + self.robot.host + "...")
+                self.printLog("Попытка подключения к роботу с host:" + self.robot.host.__repr__() + "...")
                 self.robot.connect()
                 self.__robotOn()
                 self._isConnected = True

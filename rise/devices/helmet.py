@@ -12,6 +12,7 @@ class Helmet:
 
     def __init__(self):
         self._hmd = PyOpenHMD()
+        self._start = False     # флаг, означающий, что очки могут определять углы
 
     def getRawAngles(self):
         # TODO: перенести это все в СИшный код
@@ -26,11 +27,15 @@ class Helmet:
 
     def getAngles(self):
         yaw, pitch, roll = self.getRawAngles()
-        return yaw, pitch, roll
+        if self._start:
+            return yaw, pitch, roll
+        else:
+            return 0, 0, 0
 
     def setZeroNow(self):
         """ установка начального значения по текущим значениям с очков """
         self._hmd.setZero()
+        self._start = not self._start
         # self._zeroAngles = self.getRawAngles()
 
     def reset(self):

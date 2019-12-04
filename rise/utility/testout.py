@@ -7,11 +7,9 @@ from video import Video, VIDEO_OUT_LAUNCH
 Gst.init(sys.argv)
 
 video = Video()
-video.start(VIDEO_OUT_LAUNCH.format(device="/dev/video0", ip="127.0.0.1"))
+video.start(VIDEO_OUT_LAUNCH.format(device="/dev/video0", ip="192.168.42.100"))
 
-time.sleep(10)
-video.stop()
 
-time.sleep(3)
-video.start(VIDEO_OUT_LAUNCH.format(device="/dev/video0", ip="127.0.0.1"))
-time.sleep(10)
+while True:
+    time.sleep(10)
+

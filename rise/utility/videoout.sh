@@ -1,7 +1,7 @@
 #!/bin/sh
 
-DEST=127.0.0.1
-#DEST=192.168.42.106
+#DEST=127.0.0.1
+DEST=192.168.42.100
 #DEST=192.168.42.108
 
 VELEM_L="v4l2src device=/dev/video0"

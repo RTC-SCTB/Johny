@@ -102,8 +102,8 @@ class VideoWindow:
         sinkpad0 = Gst.Element.get_static_pad(rtcpsink0, 'sink')
         Gst.Pad.link(srcpad0, sinkpad0)
 
-        rtpbin.set_property('drop-on-latency', True)
-        rtpbin.set_property('buffer-mode', 1)
+        #rtpbin.set_property('drop-on-latency', True)
+        #rtpbin.set_property('buffer-mode', 1)
 
         rtpbin.connect('pad-added', pad_added_cb, videodepay0)
 

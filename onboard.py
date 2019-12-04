@@ -21,7 +21,7 @@ robot = Robot(bus)
 robot.online = True
 server = TcpServer()
 server.open(("", configuration["port"]))
-jh = JohnyHandle(robot)
+jh = None
 
 
 def sendError(num, dlc=0):
@@ -36,7 +36,10 @@ def recvError(data):
 
 def recvCalibrate(data):
     """ обработчик события о пришествии комманды калибровки """
-    jh.calibrateHead()
+    try:
+        jh.calibrateHead()
+    except:
+        pass
 
 
 def recvPosition(data):
@@ -45,18 +48,29 @@ def recvPosition(data):
         jh.setHeadPosition(*data)
     except KeyError:
         sendError(0x03)  # отправляем код ошибки
+    except:
+        pass
 
 
 def recvVideoState(data):
-    jh.setVideoState(configuration["videodevice"], server.clientAddr, bool(data[0]))
+    try:
+        jh.setVideoState(configuration["videodevice"], server.clientAddr, bool(data[0]))
+    except:
+        pass
 
 
 def recvMove(data):
-    jh.move(data[0])
+    try:
+        jh.move(data[0])
+    except:
+        pass
 
 
 def recvRotate(data):
-    jh.rotate(data[0])
+    try:
+        jh.rotate(data[0])
+    except:
+        pass
 
 
 def recvOnline(data):
@@ -94,8 +108,11 @@ server.subscribe(6, recvRotate)
 server.subscribe("onReceive", onReceive)
 server.start()
 robot.start()
-jh.start()
 threading.Thread(daemon=True, target=th).start()
 
 while True:
+    del jh
+    jh = None
     server.connect(None)  # подключаемся в цикле, т.к. один раз запускаем скрипт на все время работы робота
+    jh = JohnyHandle(robot)
+    jh.start()

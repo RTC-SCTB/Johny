@@ -18,6 +18,12 @@ class JohnyHandle:
         self._motors = Motors(self._mot)
         self._video = Video()
 
+    def __del__(self):
+        try:
+            self._video.stop()
+        except Exception as e:
+            print("On destructor", e)
+
     def start(self):
         self._head.start()
         self._motors.start()

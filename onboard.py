@@ -111,8 +111,8 @@ robot.start()
 threading.Thread(daemon=True, target=th).start()
 
 while True:
+    server.connect(None)  # подключаемся в цикле, т.к. один раз запускаем скрипт на все время работы робота
     del jh
     jh = None
-    server.connect(None)  # подключаемся в цикле, т.к. один раз запускаем скрипт на все время работы робота
     jh = JohnyHandle(robot)
     jh.start()

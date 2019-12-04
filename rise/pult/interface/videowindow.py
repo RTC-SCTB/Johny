@@ -1,6 +1,7 @@
 import gi
 import sys
 import numpy
+import time
 
 gi.require_version("Gst", "1.0")
 gi.require_version('GstVideo', '1.0')
@@ -168,6 +169,7 @@ class VideoWindow:
             self._player = None
 
         self._window.destroy()
+        time.sleep(1)
 
     def __on_error(self, bus, msg):  # прием ошибок
         err, dbg = msg.parse_error()

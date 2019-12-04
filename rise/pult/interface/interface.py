@@ -131,12 +131,13 @@ class Pult:
                 self._helmet.reset()
                 self.printLog("Попытка подключения к роботу с host:" + self.robot.host.__repr__() + "...")
                 self.robot.connect()
-                self.__robotOn()
                 self._isConnected = True
                 self.printLog("Попытка подключения удалась")
                 self._videoWindow = VideoWindow(self._configuration["robot"]["ip"])
+                time.sleep(1)
                 self._videoWindow.start()
                 self.printLog("HDMI шлема VR найден и подключен")
+                self.__robotOn()
             except ConnectionError:
                 self.printLog("Не удается подключиться к роботу с адресом: " + self.robot.host.__repr__())
                 w.set_active(False)

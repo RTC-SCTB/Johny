@@ -27,6 +27,11 @@ class Video:
             return
         self._isConnected = True
         self._pipe = Gst.parse_launch(l)
+        bus = self._pipe.get_bus()  # создаем шину передачи сообщений и ошибок от GST
+        bus.add_signal_watch()
+        bus.enable_sync_message_emission()
+        bus.connect("message::error", self.__on_error)
+        bus.connect("message::eos", self.__on_eos)
         self._pipe.set_state(Gst.State.PLAYING)
 
     def stop(self):
@@ -34,3 +39,13 @@ class Video:
             return
         self._isConnected = False
         self._pipe.set_state(Gst.State.NULL)
+
+    def __on_error(self, bus, msg):  # прием ошибок
+        err, dbg = msg.parse_error()
+        print("ERROR:", msg.src.get_name(), ":", err.message)  # нужно ли тут вообще исключение?
+        if dbg:
+            print("Debug info:", dbg)
+
+    def __on_eos(self, bus, msg):  # ловим конец передачи видео
+        print("End-Of-Stream reached")
+        self._pipe.set_state(Gst.State.READY)

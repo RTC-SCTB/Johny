@@ -47,6 +47,10 @@ gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools
 ~$ sudo apt install python3-gi python3-pip
 
 ~$ sudo pip3 install numpy
+
+~$ sudo apt install mesa-utils libegl1-mesa libgl1-mesa-dev
+
+~$ sudo apt install freeglut3-dev freeglut3
 ```    
 P.S. На 18.04 ubuntu возможно необходимо будет установить GTK3
 + В дополнение, если показывается, что HDMI-1 disconnected(что-то из этого должно помочь):
